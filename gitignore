@@ -1,0 +1,14 @@
+# Dati personali locali — non vanno mai su GitHub
+frigorifero.json
+spesa.json
+sprechi.json
+impostazioni.json
+
+# File di ambiente con eventuali chiavi/segreti
+.env
+.streamlit/secrets.toml
+
+# File di sistema
+__pycache__/
+*.pyc
+.DS_Store

@@ -1,0 +1,6 @@
+streamlit
+openai
+pyzbar
+pillow
+requests
+pandas
