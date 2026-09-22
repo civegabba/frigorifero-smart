@@ -22,12 +22,11 @@ except ImportError:
 # =====================================================
 st.set_page_config(page_title="Frigorifero Smart", page_icon="🥶", layout="centered")
 
-# Mostra un eventuale messaggio rimasto "in coda" da un'azione precedente.
-# Usiamo st.success() invece di st.toast() perché il messaggio resta visibile
-# nella pagina anche dopo il rerun di Streamlit.
+# Mostra un eventuale toast rimasto "in coda" da un'azione precedente
+# (vedi accoda_toast per il perché di questo meccanismo).
 if "_toast_in_coda" in st.session_state:
     _messaggio_toast, _icona_toast = st.session_state.pop("_toast_in_coda")
-    st.success(f"{_icona_toast} {_messaggio_toast}")
+    st.toast(_messaggio_toast, icon=_icona_toast)
 
 st.markdown(
     """
@@ -203,9 +202,9 @@ def icona_per(alimento):
 
 def accoda_toast(messaggio, icona="✅"):
     """
-    Salva un messaggio da mostrare DOPO il prossimo rerun.
-    In questo modo il feedback non viene perso quando Streamlit
-    ricostruisce la pagina.
+    Salva un messaggio toast da mostrare DOPO il prossimo rerun.
+    Necessario perché st.toast() chiamato subito prima di st.rerun()
+    non fa in tempo a comparire: il rerun lo interrompe.
     """
     st.session_state["_toast_in_coda"] = (messaggio, icona)
 
@@ -816,13 +815,13 @@ with tab_frigo:
                         if st.button("➖", key=f"meno_{alimento}", help="Rimuovi 1"):
                             frigorifero = rimuovi_uno(frigorifero, alimento)
                             salva_dati(PERCORSO, "JSONBIN_FRIGORIFERO_ID", frigorifero)
-                            accoda_toast(f"1 unità di {alimento} rimossa dal frigorifero.", icon="➖")
+                            accoda_toast(f"{icona_per(alimento)} {alimento} aggiornato", icon="✅")
                             st.rerun()
                     with sub_r2:
                         if st.button("🗑️", key=f"elimina_{alimento}", help="Elimina (consumato)"):
                             frigorifero = rimuovi_completamente(frigorifero, alimento)
                             salva_dati(PERCORSO, "JSONBIN_FRIGORIFERO_ID", frigorifero)
-                            accoda_toast(f"{alimento} eliminato dal frigorifero.", icon="🗑️")
+                            accoda_toast(f"{icona_per(alimento)} {alimento} eliminato", icon="🗑️")
                             st.rerun()
                     with sub_r3:
                         if st.button("🚮", key=f"spreco_{alimento}", help="Segna come sprecato/buttato"):
@@ -832,7 +831,7 @@ with tab_frigo:
                             salva_dati(SPRECHI_PATH, "JSONBIN_SPRECHI_ID", cronologia_sprechi)
                             frigorifero = rimuovi_completamente(frigorifero, alimento)
                             salva_dati(PERCORSO, "JSONBIN_FRIGORIFERO_ID", frigorifero)
-                            accoda_toast(f"{alimento} segnato come sprecato e rimosso dal frigorifero.", icon="🚮")
+                            accoda_toast(f"{alimento} segnato come sprecato", icon="🚮")
                             st.rerun()
 
         if not almeno_uno_mostrato:
@@ -910,10 +909,7 @@ with tab_scansiona:
                             foto_base64=foto_base64,
                         )
                         salva_dati(PERCORSO, "JSONBIN_FRIGORIFERO_ID", frigorifero)
-                        accoda_toast(
-                            f"{nome_confermato.strip()} aggiunto al frigorifero con successo.",
-                            icon="✅"
-                        )
+                        st.success(f"{icona_per(nome_confermato)} {nome_confermato} aggiunto!")
                         st.rerun()
                     else:
                         st.warning("Inserisci un nome prodotto prima di aggiungerlo.")
@@ -965,10 +961,7 @@ with tab_aggiungi:
                 foto_base64=foto_base64,
             )
             salva_dati(PERCORSO, "JSONBIN_FRIGORIFERO_ID", frigorifero)
-            accoda_toast(
-                f"{alimento_input.strip()} aggiunto al frigorifero con successo.",
-                icon="➕"
-            )
+            st.success(f"{icona_per(alimento_input)} {alimento_input} aggiunto!")
             st.rerun()
         else:
             st.warning("Scrivi il nome di un alimento prima di aggiungerlo.")
