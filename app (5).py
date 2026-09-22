@@ -416,12 +416,15 @@ def estrai_codici_da_immagine(immagine_bytes):
 
 def cerca_prodotto_da_barcode(codice):
     url = f"https://world.openfoodfacts.org/api/v0/product/{codice}.json"
+    # Open Food Facts richiede un User-Agent identificativo nelle richieste,
+    # altrimenti alcune richieste vengono rifiutate o bloccate.
+    headers = {"User-Agent": "FrigoriferoSmart/1.0 (app personale Streamlit)"}
     try:
-        risposta = requests.get(url, timeout=6)
+        risposta = requests.get(url, headers=headers, timeout=10)
         risposta.raise_for_status()
         dati = risposta.json()
-    except requests.exceptions.RequestException:
-        return None, "Impossibile contattare il database prodotti. Controlla la connessione."
+    except requests.exceptions.RequestException as errore_rete:
+        return None, f"Impossibile contattare il database prodotti: {errore_rete}"
     except ValueError:
         return None, "Risposta non valida dal database prodotti. Riprova più tardi."
 
@@ -680,6 +683,7 @@ with st.sidebar:
         st.caption("Sei connesso.")
         if st.button("🚪 Esci"):
             st.session_state["autenticato"] = False
+            st.toast("Disconnesso", icon="👋")
             st.rerun()
         st.divider()
 
@@ -1021,7 +1025,10 @@ with tab_spesa:
         if prodotto:
             lista_spesa = aggiungi_a_lista_spesa(lista_spesa, [prodotto.strip()])
             salva_dati(SPESA_PATH, "JSONBIN_SPESA_ID", lista_spesa)
+            st.toast(f"{icona_per(prodotto)} {prodotto} aggiunto alla lista", icon="✅")
             st.rerun()
+        else:
+            st.warning("Scrivi cosa devi comprare prima di aggiungerlo.")
 
     if lista_spesa:
         for i, prodotto_ls in enumerate(lista_spesa):
@@ -1032,6 +1039,7 @@ with tab_spesa:
                 if st.button("✓", key=f"comprato_{i}"):
                     lista_spesa.pop(i)
                     salva_dati(SPESA_PATH, "JSONBIN_SPESA_ID", lista_spesa)
+                    st.toast(f"{icona_per(prodotto_ls)} {prodotto_ls} comprato!", icon="🎉")
                     st.rerun()
     else:
         st.info("La lista della spesa è vuota.")
