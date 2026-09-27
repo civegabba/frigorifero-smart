@@ -698,7 +698,7 @@ with st.sidebar:
         st.caption("Sei connesso.")
         if st.button("🚪 Esci"):
             st.session_state["autenticato"] = False
-            accoda_toast("Disconnesso", icon="👋")
+            accoda_toast("Disconnesso", icona="👋")
             st.rerun()
         st.divider()
 
@@ -815,13 +815,13 @@ with tab_frigo:
                         if st.button("➖", key=f"meno_{alimento}", help="Rimuovi 1"):
                             frigorifero = rimuovi_uno(frigorifero, alimento)
                             salva_dati(PERCORSO, "JSONBIN_FRIGORIFERO_ID", frigorifero)
-                            accoda_toast(f"{icona_per(alimento)} {alimento} aggiornato", icon="✅")
+                            accoda_toast(f"{icona_per(alimento)} {alimento} aggiornato", icona="✅")
                             st.rerun()
                     with sub_r2:
                         if st.button("🗑️", key=f"elimina_{alimento}", help="Elimina (consumato)"):
                             frigorifero = rimuovi_completamente(frigorifero, alimento)
                             salva_dati(PERCORSO, "JSONBIN_FRIGORIFERO_ID", frigorifero)
-                            accoda_toast(f"{icona_per(alimento)} {alimento} eliminato", icon="🗑️")
+                            accoda_toast(f"{icona_per(alimento)} {alimento} eliminato", icona="🗑️")
                             st.rerun()
                     with sub_r3:
                         if st.button("🚮", key=f"spreco_{alimento}", help="Segna come sprecato/buttato"):
@@ -831,7 +831,7 @@ with tab_frigo:
                             salva_dati(SPRECHI_PATH, "JSONBIN_SPRECHI_ID", cronologia_sprechi)
                             frigorifero = rimuovi_completamente(frigorifero, alimento)
                             salva_dati(PERCORSO, "JSONBIN_FRIGORIFERO_ID", frigorifero)
-                            accoda_toast(f"{alimento} segnato come sprecato", icon="🚮")
+                            accoda_toast(f"{alimento} segnato come sprecato", icona="🚮")
                             st.rerun()
 
         if not almeno_uno_mostrato:
@@ -1040,7 +1040,7 @@ with tab_spesa:
         if prodotto:
             lista_spesa = aggiungi_a_lista_spesa(lista_spesa, [prodotto.strip()])
             salva_dati(SPESA_PATH, "JSONBIN_SPESA_ID", lista_spesa)
-            accoda_toast(f"{icona_per(prodotto)} {prodotto} aggiunto alla lista", icon="✅")
+            accoda_toast(f"{icona_per(prodotto)} {prodotto} aggiunto alla lista", icona="✅")
             st.rerun()
         else:
             st.warning("Scrivi cosa devi comprare prima di aggiungerlo.")
@@ -1054,7 +1054,7 @@ with tab_spesa:
                 if st.button("✓", key=f"comprato_{i}"):
                     lista_spesa.pop(i)
                     salva_dati(SPESA_PATH, "JSONBIN_SPESA_ID", lista_spesa)
-                    accoda_toast(f"{icona_per(prodotto_ls)} {prodotto_ls} comprato!", icon="🎉")
+                    accoda_toast(f"{icona_per(prodotto_ls)} {prodotto_ls} comprato!", icona="🎉")
                     st.rerun()
     else:
         st.info("La lista della spesa è vuota.")
