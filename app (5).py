@@ -145,6 +145,28 @@ st.markdown(
         border-radius: 10px !important;
     }
     hr { border-color: #eaf2f2 !important; }
+
+    /* ---------- OTTIMIZZAZIONI MOBILE ---------- */
+    @media (max-width: 480px) {
+        .main-title { font-size: 2.1rem; }
+        .subtitle { font-size: 0.95rem; }
+        .stButton > button {
+            padding: 0.6rem 0.4rem !important;
+            font-size: 0.85rem !important;
+            min-height: 2.6rem;
+        }
+        button[data-baseweb="tab"] {
+            padding: 6px 10px !important;
+            font-size: 0.85rem !important;
+        }
+        div[data-testid="stMetricValue"] {
+            font-size: 1.4rem !important;
+        }
+    }
+    /* Bottoni sempre abbastanza grandi da toccare comodamente col dito */
+    .stButton > button {
+        min-height: 2.8rem;
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -774,6 +796,8 @@ tab_frigo, tab_scansiona, tab_aggiungi, tab_ricette, tab_piano, tab_statistiche,
 # SCHEDA: FRIGORIFERO
 # -----------------------------------------------------
 with tab_frigo:
+    if frigorifero:
+        st.caption("💡 Tocca ☰ in alto a sinistra per cercare o filtrare per categoria.")
     if not frigorifero:
         st.info("Il frigorifero è vuoto. Vai alla scheda ➕ Aggiungi per iniziare.")
     else:
@@ -788,13 +812,13 @@ with tab_frigo:
             giorni = giorni_alla_scadenza(dati.get("scadenza"))
 
             with st.container():
-                col_foto, col_info, col_azioni = st.columns([1, 3, 2])
+                col_foto, col_info = st.columns([1, 4])
                 with col_foto:
                     if dati.get("foto"):
-                        st.image(base64_a_bytes(dati["foto"]), width=60)
+                        st.image(base64_a_bytes(dati["foto"]), width=64)
                     else:
                         st.markdown(
-                            f'<div style="font-size:2.3rem; text-align:center;">{icona_per(alimento)}</div>',
+                            f'<div style="font-size:2.6rem; text-align:center;">{icona_per(alimento)}</div>',
                             unsafe_allow_html=True,
                         )
                 with col_info:
@@ -809,30 +833,34 @@ with tab_frigo:
                     )
                     if giorni is not None:
                         st.progress(livello_freschezza(giorni))
-                with col_azioni:
-                    sub_r1, sub_r2, sub_r3 = st.columns(3)
-                    with sub_r1:
-                        if st.button("➖", key=f"meno_{alimento}", help="Rimuovi 1"):
-                            frigorifero = rimuovi_uno(frigorifero, alimento)
-                            salva_dati(PERCORSO, "JSONBIN_FRIGORIFERO_ID", frigorifero)
-                            accoda_toast(f"{icona_per(alimento)} {alimento} aggiornato", icona="✅")
-                            st.rerun()
-                    with sub_r2:
-                        if st.button("🗑️", key=f"elimina_{alimento}", help="Elimina (consumato)"):
-                            frigorifero = rimuovi_completamente(frigorifero, alimento)
-                            salva_dati(PERCORSO, "JSONBIN_FRIGORIFERO_ID", frigorifero)
-                            accoda_toast(f"{icona_per(alimento)} {alimento} eliminato", icona="🗑️")
-                            st.rerun()
-                    with sub_r3:
-                        if st.button("🚮", key=f"spreco_{alimento}", help="Segna come sprecato/buttato"):
-                            cronologia_sprechi = registra_spreco(
-                                cronologia_sprechi, alimento, dati["quantita"]
-                            )
-                            salva_dati(SPRECHI_PATH, "JSONBIN_SPRECHI_ID", cronologia_sprechi)
-                            frigorifero = rimuovi_completamente(frigorifero, alimento)
-                            salva_dati(PERCORSO, "JSONBIN_FRIGORIFERO_ID", frigorifero)
-                            accoda_toast(f"{alimento} segnato come sprecato", icona="🚮")
-                            st.rerun()
+
+                sub_r1, sub_r2, sub_r3 = st.columns(3)
+                with sub_r1:
+                    if st.button("➖ Uno", key=f"meno_{alimento}", help="Rimuovi 1", use_container_width=True):
+                        frigorifero = rimuovi_uno(frigorifero, alimento)
+                        salva_dati(PERCORSO, "JSONBIN_FRIGORIFERO_ID", frigorifero)
+                        accoda_toast(f"{icona_per(alimento)} {alimento} aggiornato", icona="✅")
+                        st.rerun()
+                with sub_r2:
+                    if st.button("🗑️ Finito", key=f"elimina_{alimento}", help="Elimina (consumato)", use_container_width=True):
+                        frigorifero = rimuovi_completamente(frigorifero, alimento)
+                        salva_dati(PERCORSO, "JSONBIN_FRIGORIFERO_ID", frigorifero)
+                        accoda_toast(f"{icona_per(alimento)} {alimento} eliminato", icona="🗑️")
+                        st.rerun()
+                with sub_r3:
+                    if st.button("🚮 Buttato", key=f"spreco_{alimento}", help="Segna come sprecato/buttato", use_container_width=True):
+                        cronologia_sprechi = registra_spreco(
+                            cronologia_sprechi, alimento, dati["quantita"]
+                        )
+                        salva_dati(SPRECHI_PATH, "JSONBIN_SPRECHI_ID", cronologia_sprechi)
+                        frigorifero = rimuovi_completamente(frigorifero, alimento)
+                        salva_dati(PERCORSO, "JSONBIN_FRIGORIFERO_ID", frigorifero)
+                        accoda_toast(f"{alimento} segnato come sprecato", icona="🚮")
+                        st.rerun()
+
+                st.markdown("<hr style='margin:0.3rem 0;'>", unsafe_allow_html=True)
+
+
 
         if not almeno_uno_mostrato:
             st.info("Nessun alimento corrisponde ai filtri selezionati.")
