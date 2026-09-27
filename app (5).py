@@ -9,7 +9,7 @@ import requests
 import pandas as pd
 from datetime import date, datetime, timedelta
 from openai import OpenAI
-from PIL import Image
+from PIL import Image, ImageDraw
 
 try:
     from pyzbar.pyzbar import decode as decodifica_barcode_immagine
@@ -315,6 +315,63 @@ def immagine_a_base64(immagine_bytes, larghezza_max=300, qualita=70):
 
 def base64_a_bytes(stringa_base64):
     return base64.b64decode(stringa_base64)
+
+
+def genera_icona_app(dimensione=180):
+    """
+    Disegna un'icona a forma di frigorifero stilizzato, usata come icona
+    per 'Aggiungi a Home' su telefono. Generata a codice (nessun file esterno),
+    così iOS/Android trovano un'icona vera invece di uno screenshot generico.
+    """
+    icona = Image.new("RGB", (dimensione, dimensione), color="#ffffff")
+    disegno = ImageDraw.Draw(icona)
+
+    for y in range(dimensione):
+        t = y / dimensione
+        r = int(0x00 * (1 - t) + 0x00 * t)
+        g = int(0xB4 * (1 - t) + 0xD4 * t)
+        b = int(0xC6 * (1 - t) + 0xB8 * t)
+        disegno.line([(0, y), (dimensione, y)], fill=(r, g, b))
+
+    margine = int(dimensione * 0.22)
+    disegno.rounded_rectangle(
+        [margine, int(dimensione * 0.12), dimensione - margine, int(dimensione * 0.90)],
+        radius=int(dimensione * 0.08),
+        fill="white",
+    )
+    y_divisorio = int(dimensione * 0.35)
+    disegno.rectangle(
+        [margine, y_divisorio, dimensione - margine, y_divisorio + max(2, int(dimensione * 0.02))],
+        fill="#dfeef0",
+    )
+    x_maniglia = dimensione - margine - int(dimensione * 0.05)
+    disegno.rounded_rectangle(
+        [x_maniglia, int(dimensione * 0.18), x_maniglia + int(dimensione * 0.03), int(dimensione * 0.30)],
+        radius=4, fill="#00b4c6",
+    )
+    disegno.rounded_rectangle(
+        [x_maniglia, int(dimensione * 0.42), x_maniglia + int(dimensione * 0.03), int(dimensione * 0.54)],
+        radius=4, fill="#00b4c6",
+    )
+
+    buffer = io.BytesIO()
+    icona.save(buffer, format="PNG")
+    return buffer.getvalue()
+
+
+# Inietto l'icona come 'apple-touch-icon' (e touch-icon generico per Android),
+# così "Aggiungi a Home" sul telefono usa un'icona vera invece di uno
+# screenshot generico della pagina. Generata una sola volta per sessione.
+if "_icona_app_base64" not in st.session_state:
+    st.session_state["_icona_app_base64"] = base64.b64encode(genera_icona_app()).decode("utf-8")
+
+st.markdown(
+    f"""
+    <link rel="apple-touch-icon" href="data:image/png;base64,{st.session_state['_icona_app_base64']}">
+    <link rel="icon" type="image/png" href="data:image/png;base64,{st.session_state['_icona_app_base64']}">
+    """,
+    unsafe_allow_html=True,
+)
 
 
 # =====================================================
