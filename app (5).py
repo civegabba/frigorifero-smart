@@ -846,7 +846,7 @@ with tab_frigo:
             if st.button("🛒 Aggiungi tutti alla lista della spesa", type="primary"):
                 lista_spesa = aggiungi_a_lista_spesa(lista_spesa, scorte_basse_dashboard)
                 salva_dati(SPESA_PATH, "JSONBIN_SPESA_ID", lista_spesa)
-                st.success("Aggiunti alla lista della spesa!")
+                accoda_toast("Aggiunti alla lista della spesa!", icona="🛒")
                 st.rerun()
 
 # -----------------------------------------------------
@@ -909,7 +909,7 @@ with tab_scansiona:
                             foto_base64=foto_base64,
                         )
                         salva_dati(PERCORSO, "JSONBIN_FRIGORIFERO_ID", frigorifero)
-                        st.success(f"{icona_per(nome_confermato)} {nome_confermato} aggiunto!")
+                        accoda_toast(f"{icona_per(nome_confermato)} {nome_confermato} aggiunto!", icona="✅")
                         st.rerun()
                     else:
                         st.warning("Inserisci un nome prodotto prima di aggiungerlo.")
@@ -961,7 +961,7 @@ with tab_aggiungi:
                 foto_base64=foto_base64,
             )
             salva_dati(PERCORSO, "JSONBIN_FRIGORIFERO_ID", frigorifero)
-            st.success(f"{icona_per(alimento_input)} {alimento_input} aggiunto!")
+            accoda_toast(f"{icona_per(alimento_input)} {alimento_input} aggiunto!", icona="✅")
             st.rerun()
         else:
             st.warning("Scrivi il nome di un alimento prima di aggiungerlo.")
